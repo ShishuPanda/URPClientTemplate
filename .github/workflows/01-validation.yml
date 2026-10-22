@@ -3,6 +3,7 @@ name: 01-Validation (PR Gatekeeper)
 on:
   pull_request:
     branches: [ main, master, develop ]
+  workflow_dispatch:
 
 concurrency:
   group: pr-validation-${{ github.ref }}
