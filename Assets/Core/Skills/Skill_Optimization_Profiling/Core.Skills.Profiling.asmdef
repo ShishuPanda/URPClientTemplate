@@ -1,0 +1,16 @@
+{
+    "name": "Core.Skills.Profiling",
+    "rootNamespace": "Core.Skills.Profiling",
+    "references": [
+        "Core.Architecture"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
