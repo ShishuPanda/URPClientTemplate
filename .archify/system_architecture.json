@@ -1,0 +1,55 @@
+{
+  "system": "EnterpriseBaseMasterURP",
+  "version": "1.0.0",
+  "architecture_tier": "Staff Principal MNC Enterprise",
+  "layers": [
+    {
+      "id": "layer_presentation_ui",
+      "name": "Presentation & UI Toolkit Layer",
+      "assemblies": ["Core.UI"],
+      "description": "USS tokens, UXML dynamic layouts, Stitch importer pipeline, and MVVM ViewModel data bindings."
+    },
+    {
+      "id": "layer_skills_modules",
+      "name": "Plug-and-Play Opt-Out Skills Layer",
+      "assemblies": [
+        "Core.Skills.VR",
+        "Core.Skills.Networking",
+        "Core.Skills.AIAgent",
+        "Core.Skills.Audio",
+        "Core.Skills.Profiling",
+        "Core.Skills.Analytics"
+      ],
+      "description": "Modular isolated sub-systems communicating strictly via Core interfaces."
+    },
+    {
+      "id": "layer_core_architecture",
+      "name": "Core Architecture Layer",
+      "assemblies": ["Core.Architecture"],
+      "description": "Service Locator, Type-Safe Event Bus, Game State Machine, and Contract Interfaces."
+    },
+    {
+      "id": "layer_engine_hardware",
+      "name": "Unity Engine & Hardware Runtime",
+      "assemblies": ["UnityEngine", "Unity.RenderPipelines.Universal.Runtime", "Unity.InputSystem"],
+      "description": "Hardware input, URP Render Graph, Job System, and OpenXR platform drivers."
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "layer_presentation_ui",
+      "to": "layer_core_architecture",
+      "type": "ContractInterface"
+    },
+    {
+      "from": "layer_skills_modules",
+      "to": "layer_core_architecture",
+      "type": "ContractInterface"
+    },
+    {
+      "from": "layer_core_architecture",
+      "to": "layer_engine_hardware",
+      "type": "NativeDriver"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+name: 01-Validation (PR Gatekeeper)
+
+on:
+  pull_request:
+    branches: [ main, master, develop ]
+
+concurrency:
+  group: pr-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code_analysis:
+    name: Roslyn Static Analysis & Style Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Format & Analyzer Verification
+        run: |
+          echo "Verifying C# syntax, code formatting, and analyzer warnings..."
+          dotnet format --verify-no-changes --verbosity diagnostic || true
+
+  unity_test_runner:
+    name: Unity Test Runner (EditMode & PlayMode)
+    needs: code_analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode: [EditMode, PlayMode]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Test-${{ matrix.testMode }}-${{ hashFiles('Packages/manifest.json') }}
+          restore-keys: |
+            Library-Test-${{ matrix.testMode }}-
+            Library-Test-
+
+      - name: Run Unity Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: artifacts-${{ matrix.testMode }}
+          checkName: ${{ matrix.testMode }} Test Results
+          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport'
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test-Results-${{ matrix.testMode }}
+          path: artifacts-${{ matrix.testMode }}

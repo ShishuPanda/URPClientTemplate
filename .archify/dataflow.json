@@ -1,0 +1,48 @@
+{
+  "pipeline": "URP_HighSpeed_DataFlow",
+  "nodes": [
+    {
+      "id": "node_xr_input",
+      "name": "Hardware XR / Motion Controllers",
+      "type": "HardwareSource",
+      "frequency": "90Hz - 120Hz"
+    },
+    {
+      "id": "node_input_system",
+      "name": "Unity Input System Action Maps",
+      "type": "Driver",
+      "allocations": "0 B"
+    },
+    {
+      "id": "node_native_jobs",
+      "name": "Native C# Job System (IJobParallelFor)",
+      "type": "ComputeWorker",
+      "burst_compiled": true
+    },
+    {
+      "id": "node_motion_solver",
+      "name": "Motion & Kinematics Solver",
+      "type": "PhysicsKinematics",
+      "allocations": "0 B"
+    },
+    {
+      "id": "node_event_bus",
+      "name": "Core Event Bus & Service Locator",
+      "type": "MessagingHub",
+      "dispatch": "ZeroGC Struct Events"
+    },
+    {
+      "id": "node_urp_render_graph",
+      "name": "URP Render Graph Execution",
+      "type": "GPU_Rasterizer",
+      "features": ["FoveatedRendering", "MotionVectors", "PostProcessing"]
+    }
+  ],
+  "edges": [
+    { "from": "node_xr_input", "to": "node_input_system", "channel": "DirectInterrupt" },
+    { "from": "node_input_system", "to": "node_native_jobs", "channel": "NativeArrayBuffer" },
+    { "from": "node_native_jobs", "to": "node_motion_solver", "channel": "JobDependencyHandle" },
+    { "from": "node_motion_solver", "to": "node_event_bus", "channel": "ValueStructEvent" },
+    { "from": "node_motion_solver", "to": "node_urp_render_graph", "channel": "TransformMatrices" }
+  ]
+}

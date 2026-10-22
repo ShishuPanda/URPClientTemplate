@@ -1,0 +1,46 @@
+# Antigravity Context & Token Optimization Ignore Rules
+# Exclude heavy binary caches, builds, and logs to maximize token efficiency
+
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emory[Cc]aptures/
+.plastic/
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Exclude raw 3D assets/textures/audio binaries from indexing unless queried
+*.fbx
+*.obj
+*.blend
+*.png
+*.jpg
+*.jpeg
+*.tga
+*.psd
+*.wav
+*.mp3
+*.ogg
+*.aif
+*.mp4
+*.mov
+*.asset
+*.unity
+
+# Whitelist code contexts, manifests, and architecture definitions
+!Packages/manifest.json
+!Assets/**/*.cs
+!Assets/**/*.asmdef
+!Assets/**/*.shader
+!Assets/**/*.hlsl
+!Assets/**/*.compute
+!Assets/**/*.uxml
+!Assets/**/*.uss
+!Assets/**/*.json
+!.archify/**
+!.github/**
