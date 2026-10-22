@@ -1,0 +1,16 @@
+{
+    "name": "Core.Skills.Audio",
+    "rootNamespace": "Core.Skills.Audio",
+    "references": [
+        "Core.Architecture"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
