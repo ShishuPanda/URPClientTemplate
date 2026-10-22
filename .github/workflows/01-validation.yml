@@ -1,8 +1,8 @@
-name: 01-Validation (PR Gatekeeper)
+name: "01 - Validation (PR Gatekeeper)"
 
 on:
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   workflow_dispatch:
 
 concurrency:
@@ -10,8 +10,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ─── Job 1: Static analysis (no Unity license needed) ────────────────────
   code_analysis:
-    name: Roslyn Static Analysis & Style Check
+    name: "Roslyn Static Analysis & Style Check"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -22,15 +23,16 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
 
       - name: Format & Analyzer Verification
         run: |
           echo "Verifying C# syntax, code formatting, and analyzer warnings..."
           dotnet format --verify-no-changes --verbosity diagnostic || true
 
+  # ─── Job 2: Unity Test Runner ─────────────────────────────────────────────
   unity_test_runner:
-    name: Unity Test Runner (EditMode & PlayMode)
+    name: "Unity Test Runner (${{ matrix.testMode }})"
     needs: code_analysis
     runs-on: ubuntu-latest
     strategy:
@@ -59,10 +61,10 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          unityVersion: "6000.4.5f1"
           testMode: ${{ matrix.testMode }}
           artifactsPath: artifacts-${{ matrix.testMode }}
-          checkName: ${{ matrix.testMode }} Test Results
-          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport'
+          checkName: "${{ matrix.testMode }} Test Results"
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
