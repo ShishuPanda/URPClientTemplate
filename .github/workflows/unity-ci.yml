@@ -21,12 +21,17 @@ jobs:
       - name: Install Unity CLI
         run: |
           curl -s https://unity-cli.install.sh | bash
+          # Add local bin path to GitHub Actions environment PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Verify CLI Installation
+        run: |
+          unity --version
 
       - name: Install Unity Editor
         run: |
           unity install --version ${{ env.UNITY_VERSION }} --yes --accept-eula
 
-      # Activate Unity Personal using your account email and password
       - name: Activate Unity License
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
