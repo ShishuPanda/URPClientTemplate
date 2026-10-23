@@ -20,24 +20,22 @@ jobs:
 
       - name: Install Unity CLI
         run: |
-          curl -s https://unity-cli.install.sh | bash
-          # Ensure directory exists and check binary location
-          ls -la ~/.local/bin/
+          curl -fsSL https://public-cdn.cloud.unity3d.com/hub/prod/cli/install.sh | UNITY_CLI_CHANNEL=beta bash
 
       - name: Verify CLI Installation
         run: |
-          ~/.local/bin/unity --version
+          unity --version
 
       - name: Install Unity Editor
         run: |
-          ~/.local/bin/unity install --version ${{ env.UNITY_VERSION }} --yes --accept-eula
+          unity install --version ${{ env.UNITY_VERSION }} --yes --accept-eula
 
       - name: Activate Unity License
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
-          EDITOR_PATH=$(~/.local/bin/unity editors --json | jq -r '.[0].path')
+          EDITOR_PATH=$(unity editors --json | jq -r '.[0].path')
           
           "$EDITOR_PATH" -quit -batchmode \
             -username "$UNITY_EMAIL" \
@@ -45,7 +43,7 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          ~/.local/bin/unity test --mode EditMode --output test-results.xml
+          unity test --mode EditMode --output test-results.xml
 
       - name: Save Test Artifacts
         uses: actions/upload-artifact@v4
@@ -56,4 +54,4 @@ jobs:
 
       - name: Build Project
         run: |
-          ~/.local/bin/unity build --build-target StandaloneLinux64 --output-path ./Builds/Linux/Game.x86_64
+          unity build --build-target StandaloneLinux64 --output-path ./Builds/Linux/Game.x86_64
