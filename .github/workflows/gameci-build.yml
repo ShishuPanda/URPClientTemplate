@@ -1,0 +1,73 @@
+name: GameCI Build Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      targetPlatform:
+        description: 'Target Platform to Build'
+        required: true
+        default: 'StandaloneWindows64'
+        type: choice
+        options:
+          - StandaloneWindows64
+          - WebGL
+          - Android
+
+concurrency:
+  group: gameci-build-${{ github.ref }}-${{ inputs.targetPlatform }}
+  cancel-in-progress: true
+
+env:
+  UNITY_VERSION: "6000.4.5f1"
+
+jobs:
+  build:
+    name: Build (${{ inputs.targetPlatform }})
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Free up disk space on the GitHub runner
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+      # Step 2: Checkout repository with Git LFS support enabled
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      # Step 3: Cache the Unity Library folder to speed up subsequent builds
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Build-${{ inputs.targetPlatform }}-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-Build-${{ inputs.targetPlatform }}-
+            Library-Build-
+
+      # Step 4: Run GameCI Unity Builder using secrets for authentication
+      - name: Build Unity Project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: ${{ inputs.targetPlatform }}
+          buildsPath: build/${{ inputs.targetPlatform }}
+
+      # Step 5: Upload build directory as a downloadable GitHub Actions artifact
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: Build-${{ inputs.targetPlatform }}
+          path: build/${{ inputs.targetPlatform }}
+          retention-days: 14
